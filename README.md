@@ -1,6 +1,6 @@
 # High-Performance Comment System
 
-A minimalistic, full-stack comment system built with **TypeScript**, **NestJS**, **React**, and **PostgreSQL**, featuring high-density technical design, real-time notifications, and Docker-based deployment.
+A minimalistic, full-stack comment system built with **TypeScript**, **NestJS**, **React**, and **PostgreSQL**, featuring high-density technical design, real-time notifications, and Docker-based deployment. Read the API documentation [here](https://comments.webark.in/api/docs).
 
 ## 🚀 Features
 
