@@ -22,12 +22,12 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated, user, onViewChange }) 
     <header className="bg-bg-secondary border-b border-border px-4 py-2">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         <div className="cursor-pointer" onClick={() => onViewChange('comments')}>
-          <h1 className="text-lg ml-4 font-semibold text-fg-primary font-mono hover:text-accent-hover transition-colors">
+          <h1 className="text-lg ml-4 font-semibold text-fg-primary font-mono">
             Comments — <a 
               href="https://webark.in" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-accent hover:text-accent/70 transition-colors"
+              className="text-accent hover:text-accent-hover transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
               WebArk

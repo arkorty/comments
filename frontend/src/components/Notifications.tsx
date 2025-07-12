@@ -52,21 +52,25 @@ const Notifications: React.FC<NotificationsProps> = ({ onNewContent }) => {
         !previousNotificationsRef.current.some(prev => prev.id === notification.id)
       );
       
+      // Only show notification for new replies, not general notifications
       if (newNotifications.length > 0 && onNewContent) {
-        onNewContent(`${newNotifications.length} new notification${newNotifications.length > 1 ? 's' : ''} received`);
+        const replyNotifications = newNotifications.filter(n => n.type === 'reply');
+        if (replyNotifications.length > 0) {
+          onNewContent(`${replyNotifications.length} new reply${replyNotifications.length > 1 ? 's' : ''} received`);
+        }
       }
     }
     previousNotificationsRef.current = notifications;
   }, [notifications, onNewContent]);
 
-  // Check for new unread notifications
-  useEffect(() => {
-    if (previousUnreadCountRef.current > 0 && unreadCount.count > previousUnreadCountRef.current && onNewContent) {
-      const newUnread = unreadCount.count - previousUnreadCountRef.current;
-      onNewContent(`${newUnread} new unread notification${newUnread > 1 ? 's' : ''}`);
-    }
-    previousUnreadCountRef.current = unreadCount.count;
-  }, [unreadCount.count, onNewContent]);
+  // Remove the unread count notification effect - let the notification service handle this
+  // useEffect(() => {
+  //   if (previousUnreadCountRef.current > 0 && unreadCount.count > previousUnreadCountRef.current && onNewContent) {
+  //     const newUnread = unreadCount.count - previousUnreadCountRef.current;
+  //     onNewContent(`${newUnread} new unread notification${newUnread > 1 ? 's' : ''}`);
+  //   }
+  //   previousUnreadCountRef.current = unreadCount.count;
+  // }, [unreadCount.count, onNewContent]);
 
   // Reset notification service unread count when notifications are viewed
   useEffect(() => {

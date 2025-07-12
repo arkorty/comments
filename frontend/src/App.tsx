@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { useToast } from './hooks/useToast';
 import { notificationService } from './services/notificationService';
 import { ThemeProvider } from './hooks/useTheme';
+import { notificationsAPI, Notification as NotificationType } from './services/api';
+import { useQuery } from 'react-query';
 import Header from './components/Header';
 import Comments from './components/Comments';
 import Notifications from './components/Notifications';
@@ -23,6 +25,39 @@ function App() {
     db: false,
     lastSync: null,
   });
+
+  // Track previous notifications for reply detection
+  const previousNotificationsRef = useRef<NotificationType[]>([]);
+
+  // Check for new reply notifications globally
+  const { data: notificationsResponse } = useQuery('notifications', notificationsAPI.getNotifications, {
+    refetchInterval: 1000,
+    staleTime: 500,
+    enabled: isAuthenticated,
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+  });
+
+  const notifications = useMemo(() => notificationsResponse?.data || [], [notificationsResponse?.data]);
+
+  // Check for new reply notifications
+  useEffect(() => {
+    if (notifications.length > 0 && previousNotificationsRef.current.length > 0) {
+      const newNotifications = notifications.filter((notification: NotificationType) => 
+        !previousNotificationsRef.current.some(prev => prev.id === notification.id)
+      );
+      
+      // Only show notification for new replies
+      if (newNotifications.length > 0) {
+        const replyNotifications = newNotifications.filter((n: NotificationType) => n.type === 'reply');
+        if (replyNotifications.length > 0) {
+          showInfo(`${replyNotifications.length} new reply${replyNotifications.length > 1 ? 's' : ''} received`);
+        }
+      }
+    }
+    previousNotificationsRef.current = notifications;
+  }, [notifications, showInfo]);
 
   // Memoize system health check to prevent unnecessary re-renders
   const checkSystemHealth = useMemo(() => async () => {
@@ -82,16 +117,16 @@ function App() {
             <Login 
               onSwitchToRegister={() => setActiveView('register')} 
               onLoginSuccess={(username: string) => {
-                showInfo(`Welcome back, ${username}!`);
                 setActiveView('comments');
+                window.location.href = '/?greet=true';
               }}
             />
           ) : (
             <Register 
               onSwitchToLogin={() => setActiveView('login')} 
               onRegisterSuccess={(username: string) => {
-                showInfo(`Welcome, ${username}! Your account has been created.`);
                 setActiveView('comments');
+                window.location.href = '/?greet=true';
               }}
             />
           )}
@@ -106,6 +141,19 @@ function App() {
       </>
     );
   }, [isLoading, isAuthenticated, activeView, showInfo]);
+
+  // Check for and show welcome message from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldGreet = urlParams.get('greet');
+    if (shouldGreet === 'true' && user) {
+      showInfo(`Welcome back, ${user.username}!`);
+      // Clean up the URL by removing the greet parameter
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('greet');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [showInfo, user]);
 
   if (isLoading) {
     return (
@@ -129,12 +177,11 @@ function App() {
                           className={`w-3 h-3 rounded-full inline-block align-middle ${systemStatus.backend
               ? 'bg-red-600 border border-red-700'
               : 'bg-transparent border border-fg-secondary'}`}
-              style={{ boxSizing: 'border-box' }}
             ></span>
-            <span className="text-[10px] uppercase tracking-wider">API</span>
+            <span className="text-[10px] uppercase tracking-wider">API {`${systemStatus.backend ? 'ONLINE' : 'OFFLINE'}`}</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-[10px] uppercase tracking-wider">Last Sync: {systemStatus.lastSync ? systemStatus.lastSync.toUTCString().split(' ')[4] + ' UTC' : 'N/A'}</span>
+            <span className="text-[10px] uppercase tracking-wider">LAST CHECK: {systemStatus.lastSync ? systemStatus.lastSync.toUTCString().split(' ')[4] + ' UTC' : 'N/A'}</span>
           </div>
           {user && (
             <div className="flex items-center gap-1">

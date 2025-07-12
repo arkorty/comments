@@ -4,6 +4,7 @@ class NotificationService {
   private checkInterval: NodeJS.Timeout | null = null;
   private lastUnreadCount = 0;
   private isRunning = false;
+  private isInitialLoad = true;
   private toastCallback: ((message: string, type: 'info' | 'success' | 'error') => void) | null = null;
 
   startBackgroundChecking(toastCallback: (message: string, type: 'info' | 'success' | 'error') => void) {
@@ -11,8 +12,9 @@ class NotificationService {
     
     this.toastCallback = toastCallback;
     this.isRunning = true;
+    this.isInitialLoad = true;
     
-    // Check immediately
+    // Check immediately but don't trigger notifications on initial load
     this.checkForNewNotifications();
     
     // Then check every 1 second for faster response
@@ -35,17 +37,24 @@ class NotificationService {
       // Use the more efficient unread count endpoint for faster response
       const count = await backgroundAPI.getUnreadCount();
       
-      // If we have new unread notifications and count increased
-      if (count > 0 && count > this.lastUnreadCount) {
-        const newCount = count - this.lastUnreadCount;
-        if (this.toastCallback) {
-          // Show toast immediately for faster response
-          this.toastCallback(
-            `🔔 ${newCount} new notification${newCount > 1 ? 's' : ''}`,
-            'info'
-          );
-        }
+      // On initial load, just set the baseline count without triggering notifications
+      if (this.isInitialLoad) {
+        this.lastUnreadCount = count;
+        this.isInitialLoad = false;
+        return;
       }
+      
+      // Disabled: Only show notifications for replies (handled by Notifications component)
+      // and welcome messages (handled by App component)
+      // if (count > 0 && count > this.lastUnreadCount) {
+      //   const newCount = count - this.lastUnreadCount;
+      //   if (this.toastCallback) {
+      //     this.toastCallback(
+      //       `${newCount} new notification${newCount > 1 ? 's' : ''}`,
+      //       'info'
+      //     );
+      //   }
+      // }
       
       this.lastUnreadCount = count;
     } catch (error) {

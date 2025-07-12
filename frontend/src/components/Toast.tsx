@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Bell } from 'lucide-react';
 
 interface ToastProps {
   message: string;
@@ -8,16 +9,38 @@ interface ToastProps {
 }
 
 const Toast: React.FC<ToastProps> = ({ message, type, duration = 5000, onClose }) => {
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    // Set new timer
+    timerRef.current = setTimeout(() => {
       onClose();
     }, duration);
 
-    return () => clearTimeout(timer);
-  }, [duration, onClose]);
+    // Cleanup function
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [duration]); // Only depend on duration, not onClose
+
+  const handleClick = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    onClose();
+  };
 
   const getToastClasses = () => {
-    const baseClasses = "px-4 py-3 rounded text-sm font-medium max-w-xs shadow-custom animate-slideIn";
+    const baseClasses = "flex items-center px-4 py-3 rounded text-sm font-medium max-w-xs shadow-custom animate-slideIn";
     
     const typeClasses = {
       success: "bg-success text-bg-primary",
@@ -30,7 +53,8 @@ const Toast: React.FC<ToastProps> = ({ message, type, duration = 5000, onClose }
   };
 
   return (
-    <div className={getToastClasses()}>
+    <div className={getToastClasses()} onClick={handleClick}>
+      <Bell className='w-5 mr-2'></Bell>
       {message}
     </div>
   );
