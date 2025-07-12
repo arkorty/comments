@@ -78,7 +78,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onUpdate, filterDele
   if (comment.isDeleted) {
     return (
       <div className="bg-bg-secondary border border-border rounded-md p-4 opacity-60">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1 sm:gap-0">
           <span className="text-accent font-medium">{comment.author.username}</span>
           <span 
             className="text-xs text-fg-muted"
@@ -107,21 +107,16 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onUpdate, filterDele
   }
 
   return (
-    <div className="bg-bg-secondary border border-border rounded-md p-4 hover:bg-bg-tertiary transition-colors">
-      <div className="flex justify-between items-center mb-2">
+    <div className="bg-bg-secondary border border-border rounded-md p-4 transition-colors">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1 sm:gap-0">
         <span className="text-accent font-medium">{comment.author.username}</span>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
           <span 
-            className="text-xs text-fg-muted"
+            className="text-xs text-fg-muted self-end sm:self-auto"
             title={format(new Date(comment.createdAt), "yyyy-MM-dd HH:mm:ss 'UTC'")}
           >
             {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
           </span>
-          {comment.children && comment.children.length > 0 && (
-            <span className="text-xs text-fg-secondary bg-bg-tertiary px-2 py-1 rounded">
-              ({comment.children.length} replies)
-            </span>
-          )}
         </div>
       </div>
 

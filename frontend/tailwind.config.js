@@ -38,6 +38,16 @@ module.exports = {
           light: 'var(--border-light)',
         },
       },
+      spacing: {
+        'compact-px': '1px',
+        'compact-1': '2px',
+        'compact-2': '4px',
+        'compact-3': '8px',
+      },
+      fontSize: {
+        'compact-xs': ['11px', '16px'],
+        'compact-sm': ['13px', '18px'],
+      },
     },
   },
   plugins: [],

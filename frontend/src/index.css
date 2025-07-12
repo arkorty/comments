@@ -7,8 +7,35 @@
 @layer base {
   html, body, * {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    @apply font-mono;
+    @apply font-mono text-[13px];
   }
+  
+  /* Compact form elements and containers */
+  input, textarea, select, button {
+    @apply text-xs px-2 py-1;
+  }
+  
+  /* Compact utility classes for common containers */
+  .rounded-md, .rounded, .rounded-lg {
+    @apply rounded-sm;
+  }
+  .p-6 { @apply p-3; }
+  .p-4 { @apply p-2; }
+  .p-3 { @apply p-1; }
+  .py-2 { @apply py-1; }
+  .px-4 { @apply px-2; }
+  .px-3 { @apply px-1; }
+  .mb-4 { @apply mb-2; }
+  .mt-4 { @apply mt-2; }
+  .gap-4 { @apply gap-2; }
+  .gap-3 { @apply gap-1; }
+  .w-10 { @apply w-8; }
+  .h-10 { @apply h-8; }
+  .w-16 { @apply w-12; }
+  .max-w-md { @apply max-w-sm; }
+  .text-lg { @apply text-base; }
+  .text-sm { @apply text-xs; }
+  .text-xs { @apply text-[11px]; }
 
   :root {
     /* Light mode colors */
@@ -98,5 +125,19 @@
     background-color: var(--bg-primary);
     color: var(--fg-primary);
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+} 
+
+@layer components {
+  button:disabled,
+  button[disabled] {
+    pointer-events: none;
+  }
+  button:disabled:hover,
+  button[disabled]:hover {
+    background-color: inherit !important;
+    color: inherit !important;
+    border-color: inherit !important;
+    filter: none !important;
   }
 } 
