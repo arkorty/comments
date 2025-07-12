@@ -23,10 +23,10 @@
     "typescript": "^4.9.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "bunx react-scripts start",
+    "build": "bunx react-scripts build",
+    "test": "bunx react-scripts test",
+    "eject": "bunx react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
