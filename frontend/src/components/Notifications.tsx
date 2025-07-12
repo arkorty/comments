@@ -10,7 +10,7 @@ interface NotificationsProps {
 }
 
 const Notifications: React.FC<NotificationsProps> = ({ onNewContent }) => {
-  const [showAll, setShowAll] = useState(false);
+  const [showHidden, setShowHidden] = useState(false);
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const previousNotificationsRef = useRef<NotificationType[]>([]);
@@ -95,7 +95,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNewContent }) => {
     markAllAsReadMutation.mutate();
   };
 
-  const filteredNotifications = showAll 
+  const filteredNotifications = showHidden 
     ? notifications 
     : notifications.filter(n => !n.isRead);
 
@@ -148,15 +148,16 @@ const Notifications: React.FC<NotificationsProps> = ({ onNewContent }) => {
           
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showAll}
-                  onChange={(e) => setShowAll(e.target.checked)}
-                  className="w-3 h-3 bg-bg-tertiary border border-border rounded focus:ring-accent focus:ring-1"
-                />
-                <span className="text-xs text-fg-secondary uppercase tracking-wider">Show All</span>
-              </label>
+              <button
+                onClick={() => setShowHidden(!showHidden)}
+                className={`px-3 py-1 rounded text-xs font-medium cursor-pointer transition-all duration-200 uppercase tracking-wider font-sans ${
+                  showHidden 
+                    ? 'bg-accent text-bg-primary hover:bg-accent-hover' 
+                    : 'bg-bg-tertiary text-fg-primary border border-border hover:bg-bg-secondary hover:border-border-light'
+                }`}
+              >
+                {showHidden ? 'Hide Read' : 'SHOW READ'}
+              </button>
             </div>
             
             {stats.unread > 0 && (
@@ -190,7 +191,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNewContent }) => {
         ) : filteredNotifications.length === 0 ? (
           <div className="text-center py-8 text-fg-secondary">
             <span>
-              {showAll ? 'No notifications yet.' : 'No unread notifications.'}
+              {showHidden ? 'No notifications yet.' : 'No unread notifications.'}
             </span>
           </div>
         ) : (

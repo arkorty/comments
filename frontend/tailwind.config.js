@@ -8,10 +8,34 @@ module.exports = {
     extend: {
       colors: {
         error: {
-          DEFAULT: '#dc2626', // red-600
+          DEFAULT: '#dc2626',
         },
         accent: {
-          DEFAULT: '#6b7280', // gray-500
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+        },
+        success: {
+          DEFAULT: '#16a34a',
+        },
+        warning: {
+          DEFAULT: '#ca8a04',
+        },
+        // Background colors
+        bg: {
+          primary: 'var(--bg-primary)',
+          secondary: 'var(--bg-secondary)',
+          tertiary: 'var(--bg-tertiary)',
+        },
+        // Foreground colors
+        fg: {
+          primary: 'var(--fg-primary)',
+          secondary: 'var(--fg-secondary)',
+          muted: 'var(--fg-muted)',
+        },
+        // Border colors
+        border: {
+          DEFAULT: 'var(--border)',
+          light: 'var(--border-light)',
         },
       },
     },

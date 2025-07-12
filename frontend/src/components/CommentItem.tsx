@@ -8,9 +8,10 @@ import CreateCommentForm from './CreateCommentForm';
 interface CommentItemProps {
   comment: CommentType;
   onUpdate: () => void;
+  filterDeleted?: boolean;
 }
 
-const CommentItem: React.FC<CommentItemProps> = ({ comment, onUpdate }) => {
+const CommentItem: React.FC<CommentItemProps> = ({ comment, onUpdate, filterDeleted = false }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -193,9 +194,16 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onUpdate }) => {
 
       {comment.children && comment.children.length > 0 && (
         <div className="mt-4 ml-8 border-l-2 border-border pl-4 space-y-4">
-          {comment.children.map((child) => (
-            <CommentItem key={child.id} comment={child} onUpdate={onUpdate} />
-          ))}
+          {comment.children
+            .filter((child) => !filterDeleted || !child.isDeleted)
+            .map((child) => (
+              <CommentItem 
+                key={child.id} 
+                comment={child} 
+                onUpdate={onUpdate} 
+                filterDeleted={filterDeleted}
+              />
+            ))}
         </div>
       )}
     </div>

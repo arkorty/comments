@@ -11,7 +11,7 @@ interface CommentsProps {
 
 const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'replies'>('newest');
-  const [filterDeleted, setFilterDeleted] = useState(false);
+  const [showDeleted, setShowDeleted] = useState(false);
   const queryClient = useQueryClient();
   const previousCommentsRef = useRef<CommentType[]>([]);
 
@@ -31,26 +31,14 @@ const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
   // Memoize comments to prevent unnecessary re-renders
   const comments = useMemo(() => response?.data || [], [response?.data]);
 
-  // Check for new comments and show toast
+  // Track previous comments for comparison
   useEffect(() => {
-    if (comments.length > 0 && previousCommentsRef.current.length > 0) {
-      const newComments = comments.filter(comment => 
-        !previousCommentsRef.current.some(prev => prev.id === comment.id)
-      );
-      
-      if (newComments.length > 0 && onNewContent) {
-        onNewContent(`${newComments.length} new comment${newComments.length > 1 ? 's' : ''} loaded`);
-      }
-    }
     previousCommentsRef.current = comments;
-  }, [comments, onNewContent]);
+  }, [comments]);
 
   const createCommentMutation = useMutation(commentsAPI.createComment, {
     onSuccess: () => {
       queryClient.invalidateQueries('comments');
-      if (onNewContent) {
-        onNewContent('Comment posted successfully!');
-      }
     },
   });
 
@@ -60,7 +48,7 @@ const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
 
   const rootComments = useMemo(() => {
     let roots = comments;
-    if (filterDeleted) {
+    if (!showDeleted) {
       roots = roots.filter((comment: CommentType) => !comment.isDeleted);
     }
     roots = roots.slice(); // shallow copy for sorting
@@ -77,7 +65,7 @@ const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
       }
     });
     return roots;
-  }, [comments, filterDeleted, sortBy]);
+  }, [comments, showDeleted, sortBy]);
 
   const stats = {
     total: comments.length,
@@ -107,9 +95,7 @@ const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
       {/* Comments Header with Stats */}
       <div className="bg-bg-secondary border border-border rounded-md p-4">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <h2 className="text-lg font-semibold text-accent">Comments</h2>
-            <div className="flex flex-wrap gap-4 text-xs">
+          <div className="flex flex-wrap text-xs sm:flex-row sm:items-center gap-4">
               <span className="flex items-center gap-1">
                 <span className="text-fg-secondary uppercase tracking-wider">Total:</span>
                 <span className="text-fg-primary font-mono">{stats.total}</span>
@@ -128,7 +114,6 @@ const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
                   <span className="text-error font-mono">{stats.deleted}</span>
                 </span>
               )}
-            </div>
           </div>
           
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -146,15 +131,16 @@ const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
             </div>
             
             <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filterDeleted}
-                  onChange={(e) => setFilterDeleted(e.target.checked)}
-                  className="w-3 h-3 bg-bg-tertiary border border-border rounded focus:ring-accent focus:ring-1"
-                />
-                <span className="text-xs text-fg-secondary uppercase tracking-wider">Hide Deleted</span>
-              </label>
+              <button
+                onClick={() => setShowDeleted(!showDeleted)}
+                className={`px-3 py-1 rounded text-xs font-medium cursor-pointer transition-all duration-200 uppercase tracking-wider font-sans ${
+                  showDeleted 
+                    ? 'bg-accent text-bg-primary hover:bg-accent-hover' 
+                    : 'bg-bg-tertiary text-fg-primary border border-border hover:bg-bg-secondary hover:border-border-light'
+                }`}
+              >
+                {showDeleted ? 'Hide Deleted' : 'Show Deleted'}
+              </button>
             </div>
           </div>
         </div>
@@ -180,6 +166,7 @@ const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
               key={comment.id}
               comment={comment}
               onUpdate={() => queryClient.invalidateQueries('comments')}
+              filterDeleted={!showDeleted}
             />
           ))
         )}
@@ -191,7 +178,7 @@ const Comments: React.FC<CommentsProps> = ({ onNewContent }) => {
           <span>
             Showing {rootComments.length} of {stats.total} comments
           </span>
-          {stats.deleted > 0 && !filterDeleted && (
+          {stats.deleted > 0 && showDeleted && (
             <span>
               ({stats.deleted} deleted)
             </span>

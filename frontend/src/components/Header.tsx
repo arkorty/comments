@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { User } from '../services/api';
 import { Megaphone } from 'lucide-react';
+import ThemeSwitcher from './ThemeSwitcher';
 
 interface HeaderProps {
   isAuthenticated: boolean;
@@ -21,11 +22,20 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated, user, onViewChange }) 
     <header className="bg-bg-secondary border-b border-border px-4 py-2">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         <div className="cursor-pointer" onClick={() => onViewChange('comments')}>
-          <h1 className="text-lg font-semibold text-accent font-mono hover:text-accent-hover transition-colors">
-            Comments System
+          <h1 className="text-lg ml-4 font-semibold text-fg-primary font-mono hover:text-accent-hover transition-colors">
+            Comments — <a 
+              href="https://webark.in" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-accent hover:text-accent/70 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              WebArk
+            </a>
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          <ThemeSwitcher />
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <button 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { useToast } from './hooks/useToast';
 import { notificationService } from './services/notificationService';
+import { ThemeProvider } from './hooks/useTheme';
 import Header from './components/Header';
 import Comments from './components/Comments';
 import Notifications from './components/Notifications';
@@ -26,7 +27,7 @@ function App() {
   // Memoize system health check to prevent unnecessary re-renders
   const checkSystemHealth = useMemo(() => async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/docs');
+      const response = await fetch('https://comments.webark.in/api/docs');
       setSystemStatus(prev => ({ ...prev, backend: response.ok, lastSync: new Date() }));
     } catch (error) {
       setSystemStatus(prev => ({ ...prev, backend: false, lastSync: new Date() }));
@@ -36,7 +37,7 @@ function App() {
   // System health check
   useEffect(() => {
     checkSystemHealth();
-    const interval = setInterval(checkSystemHealth, 30000); // Check every 30s
+    const interval = setInterval(checkSystemHealth, 5000); // Check every 5 seconds
     return () => clearInterval(interval);
   }, [checkSystemHealth]);
 
@@ -116,44 +117,46 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Toast Container */}
-      <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-      
-      {/* System Status Bar */}
-      <div className="bg-bg-secondary border-b border-border px-3 py-1 flex items-center gap-4 text-xs font-mono text-fg-secondary">
-        <div className="flex items-center gap-1">
-          <span
-            className={`w-3 h-3 rounded-full inline-block align-middle ${systemStatus.backend
-              ? 'bg-red-600 border border-red-700'
-              : 'bg-transparent border border-black'}`}
-            style={{ boxSizing: 'border-box' }}
-          ></span>
-          <span className="text-[10px] uppercase tracking-wider">API</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-[10px] uppercase tracking-wider">Last Sync: {systemStatus.lastSync ? systemStatus.lastSync.toUTCString().split(' ')[4] + ' UTC' : 'N/A'}</span>
-        </div>
-        {user && (
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] uppercase tracking-wider">User: {user.username}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <Header 
-          isAuthenticated={isAuthenticated} 
-          user={user}
-          onViewChange={setActiveView}
-        />
+    <ThemeProvider>
+      <div className="min-h-screen flex flex-col">
+        {/* Toast Container */}
+        <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
         
-        <main className="flex-1 p-4 max-w-7xl mx-auto w-full">
-          {mainContent}
-        </main>
+        {/* System Status Bar */}
+        <div className="bg-bg-secondary border-b border-border px-3 py-1 flex items-center gap-4 text-xs font-mono text-fg-secondary">
+          <div className="flex items-center gap-1">
+            <span
+                          className={`w-3 h-3 rounded-full inline-block align-middle ${systemStatus.backend
+              ? 'bg-red-600 border border-red-700'
+              : 'bg-transparent border border-fg-secondary'}`}
+              style={{ boxSizing: 'border-box' }}
+            ></span>
+            <span className="text-[10px] uppercase tracking-wider">API</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] uppercase tracking-wider">Last Sync: {systemStatus.lastSync ? systemStatus.lastSync.toUTCString().split(' ')[4] + ' UTC' : 'N/A'}</span>
+          </div>
+          {user && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] uppercase tracking-wider">User: {user.username}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          <Header 
+            isAuthenticated={isAuthenticated} 
+            user={user}
+            onViewChange={setActiveView}
+          />
+          
+          <main className="flex-1 p-4 max-w-7xl mx-auto w-full">
+            {mainContent}
+          </main>
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
 
